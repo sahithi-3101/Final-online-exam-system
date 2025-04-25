@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Take Exam</title>
+  <style>
+    body {
+      background-color: #161e31;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    .question {
+      background-color: #292f4d;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+    }
+
+    .question h3 {
+      margin-top: 0;
+    }
+
+    label {
+      display: block;
+      margin: 5px 0;
+    }
+
+    button {
+      padding: 10px 15px;
+      background-color: #ecb180;
+      border: none;
+      border-radius: 5px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Online Examination</h1>
+  <form id="exam-form"></form>
+  <button onclick="submitAnswers()">Submit</button>
+
+  <script>
+    async function loadQuestions() {
+      const res = await fetch('http://localhost:3000/api/questions');
+      const questions = await res.json();
+
+      const form = document.getElementById('exam-form');
+      form.innerHTML = '';
+
+      questions.forEach((q, index) => {
+        const div = document.createElement('div');
+        div.className = 'question';
+        div.innerHTML = `
+          <h3>Q${index + 1}: ${q.question}</h3>
+          <label><input type="radio" name="q${index}" value="A"> A. ${q.options.A}</label>
+          <label><input type="radio" name="q${index}" value="B"> B. ${q.options.B}</label>
+          <label><input type="radio" name="q${index}" value="C"> C. ${q.options.C}</label>
+          <label><input type="radio" name="q${index}" value="D"> D. ${q.options.D}</label>
+        `;
+        form.appendChild(div);
+      });
+    }
+
+    function submitAnswers() {
+      alert('Exam submitted! (Evaluation logic can be added)');
+    }
+
+    loadQuestions();
+  </script>
+</body>
+</html>

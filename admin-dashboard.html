@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard - Add Questions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #161e31;
+      color: white;
+      font-family: 'Arial', sans-serif;
+    }
+
+    h1 {
+      color: #ecb180;
+    }
+
+    #submission-count {
+      color: #90ee90;
+    }
+
+    .form-container, .preview-container {
+      background-color: #292f4d;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      background-color: #424669;
+      color: white;
+    }
+
+    button {
+      background-color: #ecb180;
+      color: black;
+    }
+
+    button:hover {
+      background-color: #d19f68;
+    }
+
+    .question-box {
+      background-color: #1e243a;
+      padding: 15px;
+      margin-top: 15px;
+      border-radius: 10px;
+    }
+
+    .form-container, .preview-container {
+      max-width: 800px;
+      margin: 20px auto;
+    }
+
+    /* Tailwind Customizations */
+    .btn-primary {
+      @apply bg-orange-400 text-black px-5 py-2 rounded-lg font-semibold;
+    }
+
+    .btn-primary:hover {
+      @apply bg-orange-500;
+    }
+
+    .question-box pre {
+      word-wrap: break-word;
+    }
+
+    /* Responsive Layout */
+    @media (max-width: 768px) {
+      .form-container, .preview-container {
+        padding: 15px;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      .question-box {
+        margin-top: 10px;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-gray-900 text-white py-8 px-4">
+
+  <h1 class="text-center text-3xl font-semibold">Admin Dashboard</h1>
+  <div id="submission-count" class="text-center mt-2 text-lg">Submitted Questions: 0</div>
+
+  <div class="form-container mt-6">
+    <form id="question-form" onsubmit="addQuestion(event)">
+      <div class="mb-4">
+        <label for="question" class="block text-sm font-semibold mb-2">Question</label>
+        <textarea id="question" rows="3" class="w-full p-3 rounded-md bg-gray-800 text-white" required></textarea>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label for="optionA" class="block text-sm font-semibold mb-2">Option A</label>
+          <input type="text" id="optionA" class="w-full p-3 rounded-md bg-gray-800 text-white" required>
+        </div>
+        <div>
+          <label for="optionB" class="block text-sm font-semibold mb-2">Option B</label>
+          <input type="text" id="optionB" class="w-full p-3 rounded-md bg-gray-800 text-white" required>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label for="optionC" class="block text-sm font-semibold mb-2">Option C</label>
+          <input type="text" id="optionC" class="w-full p-3 rounded-md bg-gray-800 text-white" required>
+        </div>
+        <div>
+          <label for="optionD" class="block text-sm font-semibold mb-2">Option D</label>
+          <input type="text" id="optionD" class="w-full p-3 rounded-md bg-gray-800 text-white" required>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label for="correct" class="block text-sm font-semibold mb-2">Correct Answer</label>
+        <select id="correct" class="w-full p-3 rounded-md bg-gray-800 text-white" required>
+          <option value="">Select the correct answer</option>
+          <option value="A">Option A</option>
+          <option value="B">Option B</option>
+          <option value="C">Option C</option>
+          <option value="D">Option D</option>
+        </select>
+      </div>
+
+      <div class="flex justify-between items-center">
+        <button type="submit" class="btn-primary">Add Question</button>
+        <button type="button" onclick="submitAllQuestions()" class="btn-primary">Submit All Questions</button>
+        <button type="button" onclick="clearAllQuestions()" class="btn-primary bg-red-500 hover:bg-red-600">Clear All</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="preview-container mt-6">
+    <h2 class="text-xl font-semibold">Questions Preview</h2>
+    <div id="preview-list"></div>
+  </div>
+
+  <script>
+    const questions = [];
+    let submittedCount = 0;
+
+    function addQuestion(event) {
+      event.preventDefault();
+      const question = document.getElementById("question").value;
+      const optionA = document.getElementById("optionA").value;
+      const optionB = document.getElementById("optionB").value;
+      const optionC = document.getElementById("optionC").value;
+      const optionD = document.getElementById("optionD").value;
+      const correct = document.getElementById("correct").value;
+
+      const q = {
+        question,
+        options: { A: optionA, B: optionB, C: optionC, D: optionD },
+        correctAnswer: correct
+      };
+
+      questions.push(q);
+      displayQuestions();
+      document.getElementById("question-form").reset();
+    }
+
+    function displayQuestions() {
+      const preview = document.getElementById("preview-list");
+      preview.innerHTML = "";
+      questions.forEach((q, index) => {
+        preview.innerHTML += `
+          <div class="question-box">
+            <pre><strong>Q${index + 1}:</strong> ${q.question}</pre>
+            <pre>A. ${q.options.A}</pre>
+            <pre>B. ${q.options.B}</pre>
+            <pre>C. ${q.options.C}</pre>
+            <pre>D. ${q.options.D}</pre>
+            <pre><strong>Correct:</strong> ${q.correctAnswer}</pre>
+          </div>
+        `;
+      });
+    }
+
+    async function submitAllQuestions() {
+      if (questions.length === 0) {
+        alert("No questions to submit.");
+        return;
+      }
+
+      try {
+        const response = await fetch("http://localhost:3000/api/save-questions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ questions })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          submittedCount += questions.length;
+          document.getElementById("submission-count").textContent =
+            "Submitted Questions: " + submittedCount;
+
+          if (confirm(`You submitted ${questions.length} questions successfully!\nClick OK to go to login page.`)) {
+            window.location.href = "login.html";
+          }
+
+          questions.length = 0;
+          displayQuestions();
+        } else {
+          alert("Submission failed. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Server error. Try again.");
+      }
+    }
+
+    // Clear all questions both locally and in the backend
+    async function clearAllQuestions() {
+      // Clear local questions array
+      questions.length = 0;
+      submittedCount = 0;
+      document.getElementById("submission-count").textContent = "Submitted Questions: 0";
+      displayQuestions();
+
+      // Send a DELETE request to the backend to clear all saved questions
+      try {
+        const response = await fetch("http://localhost:3000/api/clear-all-questions", {
+          method: "DELETE", // We use DELETE to remove all questions
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          alert("All questions have been cleared from the backend.");
+        } else {
+          alert("Failed to clear questions. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Server error. Try again.");
+      }
+    }
+  </script>
+
+</body>
+
+</html>
