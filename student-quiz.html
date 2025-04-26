@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Programming Quiz</title>
   <style>
@@ -259,12 +259,10 @@
       .main-container {
         flex-direction: column;
       }
-      
       .questions-panel {
         width: 100%;
         max-height: 200px;
       }
-      
       .question-nav {
         grid-template-columns: repeat(8, 1fr);
       }
@@ -274,11 +272,9 @@
       .question-nav {
         grid-template-columns: repeat(6, 1fr);
       }
-      
       .question-text {
         font-size: 1.1rem;
       }
-      
       button {
         padding: 10px 15px;
         font-size: 0.9rem;
@@ -289,17 +285,14 @@
       .question-nav {
         grid-template-columns: repeat(4, 1fr);
       }
-      
       .header {
         flex-direction: column;
         gap: 10px;
       }
-      
       .navigation {
         flex-direction: column;
         gap: 10px;
       }
-      
       button {
         width: 100%;
       }
@@ -373,7 +366,7 @@
     let userAnswers = {};
     let timer;
     let timeLeft;
-    let quizDuration = 10 * 60; // 10 minutes in seconds
+    const quizDuration = 10 * 60; // 10 minutes
 
     // DOM elements
     const quizContentEl = document.getElementById('quiz-content');
@@ -391,21 +384,22 @@
     const resultDetailsEl = document.getElementById('result-details');
 
     async function initQuiz() {
-  try {
-    const urlParams = new URLSearchParams(window.location.search);
-    const subjectId = urlParams.get('subject');
-    
-    const response = await fetch(`/api/questions?subject=${subjectId}`);
-    questions = await response.json();
-    
-    // Rest of your existing init code...
-  } catch (error) {
-    console.error('Error loading quiz:', error);
-    quizContentEl.innerHTML = '<h2>Error loading quiz. Please try again later.</h2>';
-  }
-}
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const subjectId = urlParams.get('subject');
+        const response = await fetch(`/api/questions?subject=${subjectId}`);
+        questions = await response.json();
+        questions.forEach((_, i) => userAnswers[i] = null);
+        createQuestionNav();
+        showQuestion(0);
+        updateProgress();
+        startTimer();
+      } catch (error) {
+        console.error('Error loading quiz:', error);
+        quizContentEl.innerHTML = '<h2>Error loading quiz. Please try again later.</h2>';
+      }
+    }
 
-    // Create question navigation buttons
     function createQuestionNav() {
       questionNavEl.innerHTML = '';
       questions.forEach((_, index) => {
@@ -418,12 +412,10 @@
       updateQuestionNav();
     }
 
-    // Update question navigation styling
     function updateQuestionNav() {
       const navItems = document.querySelectorAll('.nav-item');
       navItems.forEach((item, index) => {
         item.classList.remove('current', 'answered', 'unanswered');
-        
         if (index === currentQuestionIndex) {
           item.classList.add('current');
         } else if (userAnswers[index] !== null) {
@@ -434,84 +426,46 @@
       });
     }
 
-    // Display a question
     function showQuestion(index) {
       if (index < 0 || index >= questions.length) return;
-      
       currentQuestionIndex = index;
       const question = questions[index];
-      
-      // Build question HTML
-      let html = `
-        <div class="question">
-          <div class="question-text">${question.question}</div>
-          <div class="options">
-      `;
-      
-      // Add options
+      let html = `<div class="question"><div class="question-text">${question.question}</div><div class="options">`;
       Object.entries(question.options).forEach(([key, value]) => {
         const isSelected = userAnswers[index] === key;
-        html += `
-          <div class="option ${isSelected ? 'selected' : ''}" 
-               data-option="${key}" 
-               onclick="selectOption(${index}, '${key}')">
-            ${key}. ${value}
-          </div>
-        `;
+        html += `<div class="option ${isSelected ? 'selected' : ''}" data-option="${key}" onclick="selectOption(${index}, '${key}')">${key}. ${value}</div>`;
       });
-      
       html += `</div></div>`;
       quizContentEl.innerHTML = html;
-      
-      // Update navigation buttons
       prevBtn.disabled = index === 0;
       nextBtn.disabled = index === questions.length - 1;
-      
-      // Update question nav
       updateQuestionNav();
     }
 
-    // Select an option
-    function selectOption(questionIndex, optionKey) {
-      userAnswers[questionIndex] = optionKey;
-      
-      // Update the display
+    function selectOption(index, optionKey) {
+      userAnswers[index] = optionKey;
       const options = document.querySelectorAll('.option');
       options.forEach(opt => {
-        if (opt.dataset.option === optionKey) {
-          opt.classList.add('selected');
-        } else {
-          opt.classList.remove('selected');
-        }
+        opt.classList.toggle('selected', opt.dataset.option === optionKey);
       });
-      
-      // Update progress and navigation
       updateProgress();
       updateQuestionNav();
     }
 
-    // Navigation functions
     function prevQuestion() {
-      if (currentQuestionIndex > 0) {
-        showQuestion(currentQuestionIndex - 1);
-      }
+      if (currentQuestionIndex > 0) showQuestion(currentQuestionIndex - 1);
     }
 
     function nextQuestion() {
-      if (currentQuestionIndex < questions.length - 1) {
-        showQuestion(currentQuestionIndex + 1);
-      }
+      if (currentQuestionIndex < questions.length - 1) showQuestion(currentQuestionIndex + 1);
     }
 
-    // Timer functions
     function startTimer() {
       timeLeft = quizDuration;
       updateTimerDisplay();
-      
       timer = setInterval(() => {
         timeLeft--;
         updateTimerDisplay();
-        
         if (timeLeft <= 0) {
           clearInterval(timer);
           submitQuiz();
@@ -523,15 +477,12 @@
       const minutes = Math.floor(timeLeft / 60);
       const seconds = timeLeft % 60;
       timeEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-      
-      // Change color when time is running low
       if (timeLeft <= 60) {
         timeEl.style.color = '#ff6b6b';
         timeEl.style.animation = 'pulse 1s infinite alternate';
       }
     }
 
-    // Update progress bar
     function updateProgress() {
       const answeredCount = Object.values(userAnswers).filter(a => a !== null).length;
       const progress = (answeredCount / questions.length) * 100;
@@ -539,53 +490,62 @@
       progressTextEl.textContent = `${answeredCount}/${questions.length}`;
     }
 
-    // Show confirmation before submitting
     function confirmSubmit() {
       const answeredCount = Object.values(userAnswers).filter(a => a !== null).length;
       attemptedCountEl.textContent = `You have attempted ${answeredCount} out of ${questions.length} questions.`;
       confirmationModal.style.display = 'flex';
     }
 
-    // Submit the quiz
     async function submitQuiz() {
       clearInterval(timer);
       confirmationModal.style.display = 'none';
-      
       try {
-        // Calculate score
         let score = 0;
-        questions.forEach((question, index) => {
-          if (userAnswers[index] === question.correctAnswer) {
-            score++;
-          }
+        questions.forEach((q, i) => {
+          if (userAnswers[i] === q.correctAnswer) score++;
         });
-        
-        // Show results
         scoreDisplayEl.textContent = `${score}/${questions.length}`;
         resultDetailsEl.textContent = `You answered ${score} out of ${questions.length} questions correctly.`;
         resultsModal.style.display = 'flex';
-        
-        // Send results to backend (optional)
         await fetch('/api/submit-quiz', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            answers: userAnswers,
-            score: score,
-            totalQuestions: questions.length
-          }),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ answers: userAnswers, score, totalQuestions: questions.length })
         });
-        
       } catch (error) {
         console.error('Error submitting quiz:', error);
         alert('Error submitting quiz. Please contact your instructor.');
       }
     }
 
-    // Initialize the quiz when the page loads
-    window.onload = initQuiz;
+    // === Fullscreen + Tab switch protection ===
+    function startFullscreen() {
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) elem.requestFullscreen();
+      else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+      else if (elem.mozRequestFullScreen) elem.mozRequestFullScreen();
+      else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+    }
+
+    function forceSubmitOnExit(reason) {
+      alert(`You ${reason}. The quiz will now be submitted.`);
+      submitQuiz();
+    }
+
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement) forceSubmitOnExit("exited fullscreen");
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) forceSubmitOnExit("switched tabs or minimized the window");
+    });
+
+    document.addEventListener("contextmenu", e => e.preventDefault());
+
+    window.onload = () => {
+      startFullscreen();
+      initQuiz();
+    };
   </script>
 </body>
 </html>

@@ -66,10 +66,47 @@
     }
 
     function submitAnswers() {
-      alert('Exam submitted! (Evaluation logic can be added)');
+      alert('Exam submitted!');
+      // You can add actual submission logic here, like sending answers to server
+      // window.location.href = "/thank-you"; // optional redirect after submission
     }
 
-    loadQuestions();
+    function autoSubmitExam() {
+      alert("You exited fullscreen or switched tabs. The exam will now be submitted.");
+      submitAnswers();
+    }
+
+    function startExamFullscreen() {
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.mozRequestFullScreen) {
+        elem.mozRequestFullScreen();
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+      } else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen();
+      }
+    }
+
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement) {
+        autoSubmitExam();
+      }
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        autoSubmitExam();
+      }
+    });
+
+    document.addEventListener("contextmenu", e => e.preventDefault());
+
+    window.onload = () => {
+      startExamFullscreen();
+      loadQuestions();
+    }
   </script>
 </body>
 </html>
